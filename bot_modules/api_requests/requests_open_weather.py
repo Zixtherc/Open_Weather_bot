@@ -37,4 +37,6 @@ def request_city_user(city_name : str):
 
 
     else:
-       print(response.status_code)
+      error = response.status_code
+      print(response.status_code)
+      return error
