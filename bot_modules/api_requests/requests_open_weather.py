@@ -15,7 +15,7 @@ API_KEY = api_dict["api_key"]
 def request_city_user(city_name : str):
 
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={API_KEY}"
-    response = requests.post(url, city_name)
+    response = requests.get(url, city_name)
     
   
     if response.status_code == 200:

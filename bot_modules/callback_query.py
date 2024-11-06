@@ -82,30 +82,38 @@ async def process_holiday(message: Message, state: FSMContext):
     # Пытаемся разделить текст пользователя по пробелу, чтобы получить страну и год
     country_year = user_input.split()
     if len(country_year) == 2:
-        country, year = country_year
-        print(country, "\n", year)
+        country_code, year = country_year
 
         # Обновляем состояние, где country — переменная страны, а year — переменная года
-        await state.update_data(country=country, year=year)
+        await state.update_data(country_code = country_code, year=year)
 
         # Выводим, что ввёл пользователь
-        await message.reply(f"Country: {country}, Year: {year}")
+        await message.reply(f"Country: {country_code}, Year: {year}")
 
         # Запрашиваем данные о праздниках
-        try:
-            holidays_data = request_holiday(country_name=country, year=year)
+        holidays_data = request_holiday(country_code = country_code, year = year)
+        
+        # Проверяем есть ли в holidays_data какие-то значения 
+        if holidays_data:
+            # указать 3 переменным одинаковые значения 
+            # Создаём переменные для более удобного вывода
+            holidays, country, year = holidays_data, holidays_data, holidays_data
+            # Групируем переменные в одну 
+            response_text = f"Holidays: {holidays}, Country: {country_code}, Year: {year}"
+            # Выводим текст 
+            await message.reply(response_text)
+            # Очищаем состояние после обработки
+            await state.clear()
 
-            if holidays_data:
-                holidays, country, year = holidays_data
-                response_text = f"Holidays: {holidays}, Country: {country}, Year: {year}"
-                await message.reply(response_text)
-            else:
-                await message.reply("No holiday data found for the specified country and year.")
-        except Exception as e:
-            await message.reply("An error occurred while fetching holiday data.")
-            print(f"Error fetching holiday data: {e}")
+        else:
+            await message.reply("No holiday data found for the specified country and year")
+            # Очищаем состояние после обработки
+            await state.clear()
+        
     else:
-        await message.reply("Invalid format. Please enter 'country year'.")
+        await message.reply("Invalid format. Please enter 'country year'")
+        # Очищаем состояние после обработки
+        await state.clear()
 
-    # Очищаем состояние после обработки
-    await state.clear()
+    # # Очищаем состояние после обработки
+    # await state.clear()

@@ -12,28 +12,29 @@ api_dict_holiday = read_json(name_json = "config_api.json")
 API_KEY_HOLIDAY = api_dict_holiday["api_key_holidays"]
 
 # Создаём функция для запроса на праздники
-def request_holiday(country_name : str, year : int):
-    # Записываем в переменную url адрес куда мы будем отсылать запросы 
-    url = f"https://calendarific.com/api/v2/holidays?api_key={API_KEY_HOLIDAY}&country={country_name}&year={year}"
+def request_holiday(country_code: str, year: int):
+    # Формируем URL для запроса
+    url = f"https://holidayapi.com/v1/holidays?api_key={API_KEY_HOLIDAY}&country={country_code}&year={year}"
 
-    # Создаём запрос
-    response = requests.post(url)
-    #Проверяем статус запроса ( 200 - успешный )
+    # Отправляем запрос
+    response = requests.get(url)
+
+    # Проверяем статус ответа
     if response.status_code == 200:
-
-        # Записываем в переменную весь "контент" запроса 
-        holidays_data = json.loads(response.content)
-        # Cохраняем контент в файле json
-        load_json(name_json = "load_holidays.json", value_file=holidays_data)
-        # Выводим текст 
-        print (json.dumps(holidays_data, indent=4))
-        # Записываем в переменную нужную для нас информацию
-        holidays = holidays_data.get("response", {}).get("holidays", [])
-        # Возвращаем всё что нам надо
-        return holidays, country_name, year
-    
+        # Парсим данные из ответа
+        holidays_data = response.json()
+        # Сохраняем данные в файл (если эта функция есть)
+        load_json(name_json="load_holidays.json", value_file=holidays_data)
+        # Выводим информацию для отладки
+        print(json.dumps(holidays_data, indent=4))
+        print("URL запроса:", url)
+        print("Полный ответ:", response.text)
+        
+        return holidays_data
+        
     else:
-        # Записываем в переменную статус ошибки
-        error = response.status_code
-        # Возвращаем код ошибки
-        return error
+        # Если запрос не успешен, выводим ошибку
+        print(f"Ошибка при запросе, код: {response.status_code}")
+        print("Полный ответ:", response.text)
+
+        return response.status_code
