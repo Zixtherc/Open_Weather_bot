@@ -69,6 +69,7 @@ async def city_wait(message: Message, state: FSMContext):
 #Создаём  реагирование на команду /holidaysz
 @router.message(Command("holidaysz"))
 async def com_request_holidays(message: Message, state: FSMContext):
+    
     await message.answer("Enter country name and year")
     # Устанавливаем состояние в ожидании ответа пользователя  
     await state.set_state(Form.holiday)
@@ -95,9 +96,9 @@ async def process_holiday(message: Message, state: FSMContext):
         
         # Проверяем есть ли в holidays_data какие-то значения 
         if holidays_data:
-            # указать 3 переменным одинаковые значения 
+        
             # Создаём переменные для более удобного вывода
-            holidays, country, year = holidays_data, holidays_data, holidays_data
+            holidays = country = year = holidays_data
             # Групируем переменные в одну 
             response_text = f"Holidays: {holidays}, Country: {country_code}, Year: {year}"
             # Выводим текст 
