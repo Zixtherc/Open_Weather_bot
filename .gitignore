@@ -1,4 +1,4 @@
-.venv/
+venv/
 __pycache__/
 static/
 .DS_store/

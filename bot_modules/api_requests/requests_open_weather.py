@@ -12,31 +12,38 @@ api_dict = read_json(name_json="config_api.json")
 API_KEY = api_dict["api_key"]
 
 
-def request_city_user(city_name : str):
+import requests
+import json
 
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={API_KEY}"
-    response = requests.get(url, city_name)
+def request_city_user(city_name: str, count: int = 0):
+    # Запрос к API OpenWeather
+    url = f"https://api.openweathermap.org/data/2.5/forecast?q={city_name}&appid={API_KEY}&units=metric&lang=uk&cnt=4"
+    response = requests.get(url)
     
-  
     if response.status_code == 200:
-      
-      weather_data = json.loads(response.content)
-      load_json(name_json = "load_files.json", value_file = weather_data)
-      print(json.dumps(weather_data, indent = 4))
+        # Десериализация ответа JSON
+        weather_data = json.loads(response.content)
 
-      temperature_kelvin = round(weather_data["main"]["temp"])
-      temperature_celsius = round(temperature_kelvin - 273.15)
-      humidity = round(weather_data["main"]["humidity"])
-      visibility = round(weather_data["visibility"])
-      wind = round(weather_data["wind"]["speed"])
-      user_city_name = weather_data["name"]
-      # rain = weather_data["rain"]["1h"]
-      # clouds = round(weather_data["clouds"])
-      
-      return temperature_celsius, humidity, visibility, wind, user_city_name
+        # Загружаем данные в JSON файл (предполагается, что у вас есть функция load_json)
+        load_json(name_json="load_weather.json", value_file=weather_data)
 
+        try:
+            # Пробуем получить данные для текущего индекса
+            current = weather_data["list"][count]
 
+            # Извлекаем информацию о погоде
+            temperature_celsius = round(current["main"]["temp"])
+            humidity = current["main"]["humidity"]
+            visibility = current.get("visibility", "Нет данных") 
+            wind = current["wind"]["speed"]
+            user_city_name = weather_data["city"]["name"]
+
+            return temperature_celsius, humidity, visibility, wind, user_city_name
+        except IndexError:
+            # Если индекс выходит за пределы доступных данных
+            return None
     else:
-      error = response.status_code
-      print(response.status_code)
-      return error
+        # Если запрос не удался, возвращаем код ошибки
+        error = response.status_code
+        print(f"Ошибка при запросе: {error}")
+        return error
