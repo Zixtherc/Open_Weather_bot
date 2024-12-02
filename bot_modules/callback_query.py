@@ -85,26 +85,32 @@ async def city_wait(message: Message, state: FSMContext):
 
 # Создаём обработчик на коллбек next
 @router.callback_query(F.data == "next")
-async def n_forecast (callback : CallbackQuery, state : FSMContext):
+async def n_forecast(callback: CallbackQuery, state: FSMContext):
 
-    # Получаем все состояния 
+# Получаем все состояния 
     data = await state.get_data()
-    # Записываем в переменную состояние city_user
-    city_user = data.get("city_user")
     # Записываем в переменную состояние count
     count = data.get("count", 0) + 1
 
+    # Проверяем, чтобы count не стал меньше 0
+    if count >= 4:
+        await callback.answer("Вы достигли минимального значения прогноза.", show_alert=True)
+        
+        return  # Прерываем выполнение функции
 
+    # Записываем в переменную состояние city_user
+    city_user = data.get("city_user")
+    
     # Получаем данные из функции отправки запросов 
-    weather_info = request_city_user(city_name = city_user, count = count)
+    weather_info = request_city_user(city_name=city_user, count=count)
     
     # Проверяем есть ли в weather_info какие-либо значения
     if weather_info:
 
-        # Создаём три переменные для удобного вывода
+        # Создаём переменные для удобного вывода
         temperature_celsius, humidity, visibility, wind, user_city_name = weather_info
 
-        # Групируем переменную в одну
+        # Группируем переменные в одну
         forecast = (f"Погода в {user_city_name}:\n"
                     f"Температура: {temperature_celsius}°C\n"
                     f"Влажность: {humidity}%\n"
@@ -112,65 +118,50 @@ async def n_forecast (callback : CallbackQuery, state : FSMContext):
                     f"Скорость ветра: {wind} м/c\n\n")
         
         # Обновляем состояние количества 
-        await state.update_data(count = count)
+        await state.update_data(count=count)
         # Редактируем текст с клавиатурой
-        await callback.message.edit_text(forecast, reply_markup = forecast_keyboard)
+        await callback.message.edit_text(forecast, reply_markup=forecast_keyboard)
     # Если данных нет, то выводим ошибку
     else:
         await callback.message.edit_text("Не удалось получить данные о погоде.")
 
-        
-#Создаём  реагирование на команду /holidaysz
-# @router.message(Command("holidaysz"))
-# async def com_request_holidays(message: Message, state: FSMContext):
+# Создаём обработчик на коллбек back
+@router.callback_query(F.data == "back")
+async def b_forecast(callback: CallbackQuery, state: FSMContext):
+
+    # Получаем все состояния 
+    data = await state.get_data()
+    # Записываем в переменную состояние count
+    count = data.get("count", 0) - 1
+
+    # Проверяем, чтобы count не стал меньше 0
+    if count < 0:
+        await callback.answer("Вы достигли минимального значения прогноза.", show_alert=True)
+        return  # Прерываем выполнение функции
+
+    # Записываем в переменную состояние city_user
+    city_user = data.get("city_user")
     
-#     await message.answer("Enter country name and year")
-#     # Устанавливаем состояние в ожидании ответа пользователя  
-#     await state.set_state(Form.holiday)
+    # Получаем данные из функции отправки запросов 
+    weather_info = request_city_user(city_name=city_user, count=count)
+    
+    # Проверяем есть ли в weather_info какие-либо значения
+    if weather_info:
 
-# #Если состояние "ожидание праздинка"активно , вызывается эта функция 
-# @router.message(Form.holiday)
-# async def process_holiday(message: Message, state: FSMContext):
-#     # Очищаем текст пользователя от лишних пробелов
-#     user_input = message.text.strip()
-#     current_time = datetime.now().strftime("%Y-%m-%d")
-#     await message.answer(current_time)
+        # Создаём переменные для удобного вывода
+        temperature_celsius, humidity, visibility, wind, user_city_name = weather_info
 
-#     # Пытаемся разделить текст пользователя по пробелу, чтобы получить страну и год
-#     country_year = user_input.split()
-#     if len(country_year) == 2:
-#         country_code, year = country_year
-
-#         # Обновляем состояние, где country — переменная страны, а year — переменная года
-#         await state.update_data(country_code = country_code, year=year)
-
-#         # Выводим, что ввёл пользователь
-#         await message.reply(f"Country: {country_code}, Year: {year}")
-
-#         # Запрашиваем данные о праздниках
-#         holidays_data = request_holiday(country_code = country_code, year = year)
+        # Группируем переменные в одну
+        forecast = (f"Погода в {user_city_name}:\n"
+                    f"Температура: {temperature_celsius}°C\n"
+                    f"Влажность: {humidity}%\n"
+                    f"Видимость: {visibility} м\n"
+                    f"Скорость ветра: {wind} м/c\n\n")
         
-#         # Проверяем есть ли в holidays_data какие-то значения 
-#         if holidays_data:
-        
-#             # Создаём переменные для более удобного вывода
-#             holidays = country = year = holidays_data
-#             # Групируем переменные в одну 
-#             response_text = f"Holidays: {holidays}, Country: {country_code}, Year: {year}"
-#             # Выводим текст 
-#             await message.reply(response_text)
-#             # Очищаем состояние после обработки
-#             await state.clear()
-
-#         else:
-#             await message.reply("No holiday data found for the specified country and year")
-#             # Очищаем состояние после обработки
-#             await state.clear()
-        
-#     else:
-#         await message.reply("Invalid format. Please enter 'country year'")
-#         # Очищаем состояние после обработки
-#         await state.clear()
-
-    # # Очищаем состояние после обработки
-    # await state.clear()
+        # Обновляем состояние количества 
+        await state.update_data(count=count)
+        # Редактируем текст с клавиатурой
+        await callback.message.edit_text(forecast, reply_markup=forecast_keyboard)
+    # Если данных нет, то выводим ошибку
+    else:
+        await callback.message.edit_text("Не удалось получить данные о погоде.")
