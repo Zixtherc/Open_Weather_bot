@@ -3,10 +3,12 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from .create_bot import dp
 from aiogram.filters import CommandStart, Command
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.date import DateTrigger
+from datetime import datetime, timedelta
 
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
-#                from .api_requests.requests_caledarfic import request_holiday
 
 # Импорты клавиатур 
 from .keyboard.keyboard import inline_keyboard, forecast_keyboard
@@ -15,6 +17,8 @@ from .keyboard.keyboard import inline_keyboard, forecast_keyboard
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
+# Создаём планировщик заданий
+scheduler = AsyncIOScheduler()
 
 
 # Создаём класс роутера 
@@ -24,6 +28,7 @@ router = Router()
 class Form(StatesGroup):
     waiting_for_city = State()
     holiday = State()
+    wait_data_diary = State()
 
 # Создаём реагирование на команду /start
 @router.message(CommandStart())
@@ -165,3 +170,51 @@ async def b_forecast(callback: CallbackQuery, state: FSMContext):
     # Если данных нет, то выводим ошибку
     else:
         await callback.message.edit_text("Не удалось получить данные о погоде.")
+
+@router.callback_query(F.data == "diary")
+async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
+
+    await callback.answer('')
+    await callback.message.answer("Введите время запланированого сообщения")
+    await state.set_state(Form.wait_data_diary)
+    print(Form.wait_data_diary)
+
+async def send_schedule_message(chat_id: int, text: str):
+    await router.send_message(chat_id, text)
+
+@router.callback_query(Form.wait_data_diary)
+async def schedule_diary(callback : CallbackQuery, state : FSMContext):
+
+    schedule_data = callback.text.split(maxsplit = 2)
+
+    if len(schedule_data) < 3:
+        await callback.message.edit_text("Неправильный формат времени. Пример: '12:00 10'")
+        return 
+    
+    try:
+        day = int(schedule_data[0])
+        time_str = schedule_data[1]
+        current_time = datetime.now()
+        text = schedule_data[-1]
+        print(text)
+
+        schedule_time = datetime.strptime(time_str, "%H:%M")
+        
+        if day < 0 or schedule_data < current_time:
+            await callback.message.edit.text("Дата не должна равняться текущему времени")
+            return
+        
+        schedule_date_time = current_time + timedelta(days= day, hours = schedule_date_time.hour, minutes = schedule_time.minute)
+
+    except Exception as error:
+        await callback.message.edit_text(f"Ошибка при создании запланированного сообщения: {error}")
+        return 
+    
+    job_id = f"{callback.message.chat.id}_{schedule_time.timestamp()}"
+
+    scheduler.add_job(
+        send_schedule_message,
+        trigger = DateTrigger(run_date = schedule_date_time),
+        args = [callback.callback.message.chat.id, text],
+        id = job_id
+    )

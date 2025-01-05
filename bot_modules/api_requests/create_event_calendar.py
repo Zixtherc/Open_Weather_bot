@@ -66,4 +66,4 @@ def write_event(service,
     
      # Обрабатываем ошибку, если она возникнет при запросе
     except HttpError as error: 
-        print(f'Произошла ошибка: {error}')  # Выводим ошибку   
+        print(f'Произошла ошибка : {error}')  # Выводим ошибку   

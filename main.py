@@ -16,6 +16,8 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
         authorization()
+        write_event(service= authorization())
 
-    except KeyboardInterrupt:
-        print("Exit")
+
+    except Exception as error:
+        print(f"Error: {error}")
