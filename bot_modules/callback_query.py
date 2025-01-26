@@ -4,11 +4,11 @@ from aiogram.types import Message, CallbackQuery
 from .create_bot import dp
 from aiogram.filters import CommandStart, Command
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.date import DateTrigger
 from datetime import datetime, timedelta
-
+import colorama
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
+from .useful_func.scheduled_messages import schedule
 
 # Импорты клавиатур 
 from .keyboard.keyboard import inline_keyboard, forecast_keyboard
@@ -21,7 +21,7 @@ from aiogram.fsm.context import FSMContext
 scheduler = AsyncIOScheduler()
 
 
-# Создаём класс роутера 
+# Создаём объект класса роутер
 router = Router()
 
 # Создаём класс для управления вводом пользователя 
@@ -92,7 +92,7 @@ async def city_wait(message: Message, state: FSMContext):
 @router.callback_query(F.data == "next")
 async def n_forecast(callback: CallbackQuery, state: FSMContext):
 
-# Получаем все состояния 
+    # Получаем все состояния 
     data = await state.get_data()
     # Записываем в переменную состояние count
     count = data.get("count", 0) + 1
@@ -173,48 +173,22 @@ async def b_forecast(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "diary")
 async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
-
-    await callback.answer('')
-    await callback.message.answer("Введите время запланированого сообщения")
+    callback.message.answer(' ')
+    await callback.message.answer("Введите время запланированого сообщения и его текст `МИНУТЫ`", parse_mode = "Markdown")
     await state.set_state(Form.wait_data_diary)
-    print(Form.wait_data_diary)
 
-async def send_schedule_message(chat_id: int, text: str):
-    await router.send_message(chat_id, text)
 
-@router.callback_query(Form.wait_data_diary)
-async def schedule_diary(callback : CallbackQuery, state : FSMContext):
-
-    schedule_data = callback.text.split(maxsplit = 2)
-
-    if len(schedule_data) < 3:
-        await callback.message.edit_text("Неправильный формат времени. Пример: '12:00 10'")
-        return 
-    
+@router.message(Form.wait_data_diary)
+async def schedule_send(message : Message, state : FSMContext):
+    chat_id = message.chat.id
+    data = await state.get_data()
+    user_data = data.get('wait_data_diary', message.text)
+    ready_data = user_data.split(' ', 1)
+    time = ready_data[0]
+    text = ready_data[-1]
     try:
-        day = int(schedule_data[0])
-        time_str = schedule_data[1]
-        current_time = datetime.now()
-        text = schedule_data[-1]
-        print(text)
-
-        schedule_time = datetime.strptime(time_str, "%H:%M")
-        
-        if day < 0 or schedule_data < current_time:
-            await callback.message.edit.text("Дата не должна равняться текущему времени")
-            return
-        
-        schedule_date_time = current_time + timedelta(days= day, hours = schedule_date_time.hour, minutes = schedule_time.minute)
-
+        print(f'>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<')
+        await schedule(schedule_delay = time, chat_id = chat_id, message_text = text)
+        print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
     except Exception as error:
-        await callback.message.edit_text(f"Ошибка при создании запланированного сообщения: {error}")
-        return 
-    
-    job_id = f"{callback.message.chat.id}_{schedule_time.timestamp()}"
-
-    scheduler.add_job(
-        send_schedule_message,
-        trigger = DateTrigger(run_date = schedule_date_time),
-        args = [callback.callback.message.chat.id, text],
-        id = job_id
-    )
+        await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')

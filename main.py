@@ -3,7 +3,6 @@ import asyncio
 import logging
 from bot_modules.callback_query import router
 from bot_modules.api_requests.google_calendar import authorization
-
 # Ошибка с записью событий 
 from bot_modules.api_requests.create_event_calendar import write_event
 async def main():
@@ -20,4 +19,5 @@ if __name__ == "__main__":
 
 
     except Exception as error:
-        print(f"Error: {error}")
+        # print(f"Error: {error}")
+        pass
