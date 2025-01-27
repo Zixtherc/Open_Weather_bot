@@ -1,8 +1,8 @@
-import os
+from os.path import abspath, join
 import json
 
 def load_json(name_json : str, value_file : str):
-    path = os.path.abspath(__file__ + f'../../../static/{name_json}')
+    path = abspath(join(__file__, '..', '..', 'static', name_json))
     
     with open (file = path, mode = "w") as file:
         json.dump(

@@ -1,10 +1,8 @@
 # Необходимые импорты
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
-from .create_bot import dp
 from aiogram.filters import CommandStart, Command
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from datetime import datetime, timedelta
 import colorama
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
@@ -187,7 +185,6 @@ async def schedule_send(message : Message, state : FSMContext):
     time = ready_data[0]
     text = ready_data[-1]
     try:
-        print(f'>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<')
         await schedule(schedule_delay = time, chat_id = chat_id, message_text = text)
         print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
     except Exception as error:

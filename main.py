@@ -18,6 +18,5 @@ if __name__ == "__main__":
         write_event(service= authorization())
 
 
-    except Exception as error:
-        # print(f"Error: {error}")
-        pass
+    except KeyboardInterrupt:
+        print("Bot is shutting down")

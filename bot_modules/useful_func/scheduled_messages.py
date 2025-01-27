@@ -6,9 +6,10 @@ async def schedule(schedule_delay : int = 0, chat_id : int = None, message_text 
     Асинхронная функция, которая позволит нам создать отложенное сообщение, не используя модуль `AsyncIOScheduler`
     '''
     try:
-    
+        
         print(f'{colorama.Fore.GREEN} Отложенное сообщение создано, вы в ожидании ! {colorama.Style.RESET_ALL}')
-        delay_second = int(schedule_delay * 60)
+        delay_second = (int(schedule_delay) * 60)
+        print(f'Это делей секонд : {delay_second}')
         await asyncio.sleep(delay_second)
         await bot.send_message(chat_id = chat_id, text = message_text)
         
