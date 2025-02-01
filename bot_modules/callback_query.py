@@ -172,7 +172,7 @@ async def b_forecast(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "diary")
 async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
     callback.message.answer(' ')
-    await callback.message.answer("Введите время запланированого сообщения и его текст `МИНУТЫ`", parse_mode = "Markdown")
+    await callback.message.answer("Введите время запланированого сообщения и его текст МИНУТЫ")
     await state.set_state(Form.wait_data_diary)
 
 

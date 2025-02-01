@@ -17,8 +17,8 @@ import json
 
 def request_city_user(city_name: str, count: int = 0):
     # Запрос к API OpenWeather
-    url = f"https://api.openweathermap.org/data/2.5/forecast?q={city_name}&appid={API_KEY}&units=metric&lang=uk&cnt=4"
-    response = requests.get(url)
+    URL = f"https://api.openweathermap.org/data/2.5/forecast?q={city_name}&appid={API_KEY}&units=metric&lang=uk&cnt=4"
+    response = requests.get(URL)
     
     if response.status_code == 200:
         # Десериализация ответа JSON
