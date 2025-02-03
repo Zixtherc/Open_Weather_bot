@@ -7,6 +7,7 @@ import colorama
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
 from .useful_func.scheduled_messages import schedule
+from .api_requests.request_new import request_news
 
 # Импорты клавиатур 
 from .keyboard.keyboard import inline_keyboard, forecast_keyboard
@@ -27,6 +28,7 @@ class Form(StatesGroup):
     waiting_for_city = State()
     holiday = State()
     wait_data_diary = State()
+    wait_data_news = State()
 
 # Создаём реагирование на команду /start
 @router.message(CommandStart())
@@ -189,3 +191,37 @@ async def schedule_send(message : Message, state : FSMContext):
         print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
     except Exception as error:
         await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')
+
+@router.callback_query(F.data == "news")
+async def wait_data_news(callback: CallbackQuery, state: FSMContext):
+    callback.message.answer(' ')
+    await callback.message.answer("Введите страну по которой хотите получить новость и какую по счёт новость вы хотите получить")
+    await state.set_state(Form.wait_data_news)
+
+@router.message(Form.wait_data_news)
+async def send_news(message: Message, state: FSMContext):
+    data = await state.get_data()
+    user_data = data.get('wait_data_news', message.text)
+    ready_data = user_data.split(' ')
+    source_or_country = ready_data[0]
+    news_id = int(ready_data[-1])
+    try:
+        if source_or_country:
+            news_info = request_news(country = source_or_country, count = news_id)
+            if news_info:
+                news_author, news_title, news_description, news_source, news_time = news_info
+
+                news_message = (
+                    f"Заголовок: {news_title}\n"
+                    f"Автор: {news_author}\n"
+                    f"Дата публікації: {news_time}\n"
+                    f"Опис: {news_description}\n"
+                    f"Джерело: {news_source}")
+                
+                await message.answer(news_message)
+        else:
+            await message.answer("К сожалению по указанным данным нету новостей")
+            return 
+
+    except Exception as error:
+        await message.answer(f'Ошибка при запроса новостей, код ошибки : {error}')

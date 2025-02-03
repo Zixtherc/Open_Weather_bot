@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 inline_buttons_s = [
-    [InlineKeyboardButton(text="Get weather", callback_data = "weather"), InlineKeyboardButton(text="Button2", callback_data="button2")],
+    [InlineKeyboardButton(text="Get weather", callback_data = "weather"), InlineKeyboardButton(text="Get news", callback_data="news")],
     [InlineKeyboardButton(text="Calendar", callback_data = "calendar"), InlineKeyboardButton(text="Button4", callback_data="button4")],
     [InlineKeyboardButton(text="Diary", callback_data = "diary")]
 ]
