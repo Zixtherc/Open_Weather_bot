@@ -7,7 +7,7 @@ import colorama
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
 from .useful_func.scheduled_messages import schedule
-from .api_requests.request_new import request_news
+from .api_requests.request_news import request_news
 
 # Импорты клавиатур 
 from .keyboard.keyboard import inline_keyboard, forecast_keyboard
@@ -169,57 +169,90 @@ async def b_forecast(callback: CallbackQuery, state: FSMContext):
     else:
         await callback.message.edit_text("Не удалось получить данные о погоде.")
 
+# Создаём обработчик на callback diary
 @router.callback_query(F.data == "diary")
 async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
     callback.message.answer(' ')
     await callback.message.answer("Введите время запланированого сообщения и его текст МИНУТЫ")
+    # Устанавливаем состояние
     await state.set_state(Form.wait_data_diary)
 
 
+# Создаём обработчик если состояние есть
 @router.message(Form.wait_data_diary)
+# Функция для использования функции отложенных сообщений
 async def schedule_send(message : Message, state : FSMContext):
+    # Получаем id чата 
     chat_id = message.chat.id
+    # Получаем данные из состояния
     data = await state.get_data()
+    # Получаем текст определенные данные, и текст
     user_data = data.get('wait_data_diary', message.text)
+    # Делим текст пользователя по пробелу, 1 раз
     ready_data = user_data.split(' ', 1)
+    # Получаем время полученных данных
     time = ready_data[0]
+    # Получаем текст полученных данных
     text = ready_data[-1]
+
+    # Используем операторы try, excep, для безопасного использования
     try:
+        # Вызываем функцию отложенных сообщений, в параметр записываем выше указанные переменные
         await schedule(schedule_delay = time, chat_id = chat_id, message_text = text)
+        # Выводим данные в терминал (не обязательно)
         print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
+    # Обрабатываем ошибку, если она возникнет при вызове функции
     except Exception as error:
         await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')
+        return
 
+# Создаём обработчик на callback news
 @router.callback_query(F.data == "news")
 async def wait_data_news(callback: CallbackQuery, state: FSMContext):
     callback.message.answer(' ')
     await callback.message.answer("Введите страну по которой хотите получить новость и какую по счёт новость вы хотите получить")
+    # Устанавливаем состояние
     await state.set_state(Form.wait_data_news)
 
+# Создаём обработчик если состояние есть
 @router.message(Form.wait_data_news)
 async def send_news(message: Message, state: FSMContext):
+    # Получаем все данные из состояний
     data = await state.get_data()
+    # Получаем текст определенные данные, и текст
     user_data = data.get('wait_data_news', message.text)
+    # Делим текст пользователя по пробелу
     ready_data = user_data.split(' ')
-    source_or_country = ready_data[0]
+    # Записываем данные в переменную страны
+    country = ready_data[0]
+    # Какая новость по счету интересна пользователю
     news_id = int(ready_data[-1])
+    # Используем операторы try, excep, для безопасного использования
     try:
-        if source_or_country:
-            news_info = request_news(country = source_or_country, count = news_id)
+        # Если в переменной есть какие-то данные
+        if country:
+            # Вызываем фукнцию, и записываем данные в переменную
+            news_info = request_news(country = country, count = news_id)
+            # Если данные есть, и функция отработала
             if news_info:
-                news_author, news_title, news_description, news_source, news_time  = news_info
+                # Делим в каждую переменную данные который нам надо
+                news_author, news_title, news_description, news_source, news_time = news_info
 
+                # Группируем переменную для удобной отправки  
                 news_message = (
                     f"Заголовок: {news_title}\n"
                     f"Автор: {news_author}\n"
                     f"Дата публікації: {news_time}\n"
                     f"Опис: {news_description}\n"
                     f"Джерело: {news_source}")
-                
+                # Отправляем данные
                 await message.answer(news_message)
+        # Если данных по указанной стране нету
         else:
+            # Отправляем сообщение пользователю
             await message.answer("К сожалению по указанным данным нету новостей")
             return 
-
+    # Обрабатываем ошибку, если она возникнет при вызове функции
     except Exception as error:
+        # Выводим ошибку пользователю 
         await message.answer(f'Ошибка при запроса новостей, код ошибки : {error}')
