@@ -1,6 +1,3 @@
-# Импорты тоже необходимые, но менее важны
-import datetime
-import os.path
 # Модуль для отлова ошибок 
 from googleapiclient.errors import HttpError
 

@@ -2,7 +2,7 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 import colorama
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
@@ -16,8 +16,6 @@ from .keyboard.keyboard import inline_keyboard, forecast_keyboard
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-# Создаём планировщик заданий
-scheduler = AsyncIOScheduler()
 
 
 # Создаём объект класса роутер
@@ -209,7 +207,7 @@ async def send_news(message: Message, state: FSMContext):
         if source_or_country:
             news_info = request_news(country = source_or_country, count = news_id)
             if news_info:
-                news_author, news_title, news_description, news_source, news_time = news_info
+                news_author, news_title, news_description, news_source, news_time  = news_info
 
                 news_message = (
                     f"Заголовок: {news_title}\n"
