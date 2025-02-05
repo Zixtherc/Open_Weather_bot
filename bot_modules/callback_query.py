@@ -194,23 +194,21 @@ async def schedule_send(message : Message, state : FSMContext):
     # Делим текст пользователя по пробелу, 1 раз
     ready_data = user_data.split(' ', 2)
     # Получаем время полученных данных
-    date_time = ready_data[0] 
-    minute_time = ready_data[1]
-    time = f'{date_time}.{minute_time}'
+    time = f'{ready_data[0]}.{ready_data[1]}'
     print(f'Это время поаааааа{time}')
     # Получаем текст полученных данных
     text = ready_data[-1]
 
     # Используем операторы try, excep, для безопасного использования
-    # try:
+    try:
         # Вызываем функцию отложенных сообщений, в параметр записываем выше указанные переменные
-    await schedule(exact_date = time, chat_id = chat_id, message_text = text)
-    # Выводим данные в терминал (не обязательно)
-    print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
+        await schedule(exact_date = time, chat_id = chat_id, message_text = text)
+        # Выводим данные в терминал (не обязательно)
+        print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
     # Обрабатываем ошибку, если она возникнет при вызове функции
-    # except Exception as error:
-    #     await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')
-    #     return
+    except Exception as error:
+        await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')
+        return
 
 # Создаём обработчик на callback news
 @router.callback_query(F.data == "news")
