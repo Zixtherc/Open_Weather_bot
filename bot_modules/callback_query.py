@@ -33,12 +33,26 @@ class Form(StatesGroup):
 async def start(message: Message):
     await message.answer("Hello!", reply_markup = inline_keyboard)
 
+# Создаём обработчик на команду /help
+@router.message(Command("help"))
+async def send_commands(message: Message):
+    await message.answer(
+        "Здравствуйте, вот список всех доступных команд на данный момент:\n"
+        "/weather - Получить прогноз погоды\n"
+        "/diary - Создать запланирование сообщение\n"
+        "/news - Получить последние новости"
+    )
 # Создаём обработчик на коллбек weather
 @router.callback_query(F.data == "weather")
 async def request_weather(callback : CallbackQuery, state: FSMContext):
-
     await callback.answer('')   
     await callback.message.answer("Enter city name")
+    # Устанавливаем состояние ожидание ввода города
+    await state.set_state(Form.waiting_for_city)
+
+@router.message(Command("weather"))
+async def request_weather(message : Message, state: FSMContext):
+    await message.answer("Введите название города. Пример : `Киев`")
     # Устанавливаем состояние ожидание ввода города
     await state.set_state(Form.waiting_for_city)
 
@@ -180,6 +194,12 @@ async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_diary)
 
+# Создаём обработчик на команду diary
+@router.message(Command('diary'))
+async def wait_data_diary(message : Message, state : FSMContext):
+    await message.answer("Введите время запланированого сообщения и его текст МИНУТЫ,или ТОЧНУЮ ДАТУ отложенного сообщения,вместе с МИНУТАМИ")
+    # Устанавливаем состояние
+    await state.set_state(Form.wait_data_diary)
 
 # Создаём обработчик если состояние есть
 @router.message(Form.wait_data_diary)
@@ -215,6 +235,13 @@ async def schedule_send(message : Message, state : FSMContext):
 async def wait_data_news(callback: CallbackQuery, state: FSMContext):
     callback.message.answer(' ')
     await callback.message.answer("Введите страну по которой хотите получить новость и какую по счёт новость вы хотите получить")
+    # Устанавливаем состояние
+    await state.set_state(Form.wait_data_news)
+    
+# Создаём обработчик на команду news
+@router.message(Command("news"))
+async def wait_data_news(message: CallbackQuery, state: FSMContext):
+    await message.answer("Введите страну по которой хотите получить новость и какую по счёт новость вы хотите получить")
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_news)
 

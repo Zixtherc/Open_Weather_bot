@@ -19,6 +19,10 @@ async def schedule(chat_id : int = None, message_text : str = None, exact_date: 
     - :mod:`chat_id`: для `отправки` сообщения по `указанному` chat_id 
     - :mod:`message_text`: `текст` сообщения для `отправки`
     - :mod:`exact_date`: `точная` дата и время в формате `год-месяц-день` часы:минуты:секунды, например, `'2022-02-06 12:30:00'`
+
+    Пример использования : 
+    ```python
+    await schedule(chat_id = 123456789, message_text = "Привет мир!", exact_date = "05.02 23.51")
     '''
 
     # Используем операторы try, except, для безопасного использования
