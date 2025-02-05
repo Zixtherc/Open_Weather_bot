@@ -57,18 +57,21 @@ async def city_wait(message: Message, state: FSMContext):
 
         # Если данные найдены
         if weather_info:
+            
+            try:
+                # Создаём переменные, и берём из переменной weather_info, всю не обходимую информацию
+                temperature_celsius, humidity, visibility, wind, user_city_name = weather_info
 
-            # Создаём переменные, и берём из переменной weather_info, всю не обходимую информацию
-            temperature_celsius, humidity, visibility, wind, user_city_name = weather_info
-
-            # Формируем текст прогноза для текущего периода и добавляем в общий текст
-            response = (f"Погода в {user_city_name}:\n"
-                        f"Температура: {temperature_celsius}°C\n"
-                        f"Влажность: {humidity}%\n"
-                        f"Видимость: {visibility} м\n"
-                        f"Скорость ветра: {wind} м/c\n\n")
-            # Обновляем состояние city_user и coutn 
-            await state.update_data(city_user=city_user, count=0)
+                # Формируем текст прогноза для текущего периода и добавляем в общий текст
+                response = (f"Погода в {user_city_name}:\n"
+                            f"Температура: {temperature_celsius}°C\n"
+                            f"Влажность: {humidity}%\n"
+                            f"Видимость: {visibility} м\n"
+                            f"Скорость ветра: {wind} м/c\n\n")
+                # Обновляем состояние city_user и coutn 
+                await state.update_data(city_user=city_user, count=0)
+            except Exception as error:
+                await message.reply("К сожалению, вы не правильно ввели данные,попробуйте проверить и ввести всё верно")
         
         # Если данные не найдены, то  Выводим ошибку
         else:
@@ -173,7 +176,7 @@ async def b_forecast(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "diary")
 async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
     callback.message.answer(' ')
-    await callback.message.answer("Введите время запланированого сообщения и его текст МИНУТЫ")
+    await callback.message.answer("Введите время запланированого сообщения и его текст МИНУТЫ,или ТОЧНУЮ ДАТУ отложенного сообщения,вместе с МИНУТАМИ")
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_diary)
 
@@ -189,22 +192,25 @@ async def schedule_send(message : Message, state : FSMContext):
     # Получаем текст определенные данные, и текст
     user_data = data.get('wait_data_diary', message.text)
     # Делим текст пользователя по пробелу, 1 раз
-    ready_data = user_data.split(' ', 1)
+    ready_data = user_data.split(' ', 2)
     # Получаем время полученных данных
-    time = ready_data[0]
+    date_time = ready_data[0] 
+    minute_time = ready_data[1]
+    time = f'{date_time}.{minute_time}'
+    print(f'Это время поаааааа{time}')
     # Получаем текст полученных данных
     text = ready_data[-1]
 
     # Используем операторы try, excep, для безопасного использования
-    try:
+    # try:
         # Вызываем функцию отложенных сообщений, в параметр записываем выше указанные переменные
-        await schedule(schedule_delay = time, chat_id = chat_id, message_text = text)
-        # Выводим данные в терминал (не обязательно)
-        print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
+    await schedule(exact_date = time, chat_id = chat_id, message_text = text)
+    # Выводим данные в терминал (не обязательно)
+    print(f'{colorama.Fore.CYAN} Всё получилось, сообщение и функция отработала {colorama.Style.RESET_ALL}')
     # Обрабатываем ошибку, если она возникнет при вызове функции
-    except Exception as error:
-        await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')
-        return
+    # except Exception as error:
+    #     await message.answer(f'Ошибка при создании отложенного сообщения. Ошибка : {error}')
+    #     return
 
 # Создаём обработчик на callback news
 @router.callback_query(F.data == "news")

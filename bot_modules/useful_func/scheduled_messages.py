@@ -7,33 +7,38 @@ import asyncio
 import colorama
 # Импортируем объект класса от Bot, для отправки сообщения 
 from ..create_bot import bot
+# Встроенный модуль python, который поможет нам преобразовать дату, по типу 06.02, в секунды 
+import datetime
+import time
 
-
-async def schedule(schedule_delay : int = 0, chat_id : int = None, message_text : str = None):
-    '''
+async def schedule(chat_id : int = None, message_text : str = None, exact_date: str = None):
+    r'''
     :mod:`Асинхронная` `функция`, которая позволит нам создать `отложенное сообщение`, не используя модуль `AsyncIOScheduler`
     
     Вмещает в себя параметры
     - :mod:`schedule_delay`: на сколько мы хотим создать отложенное сообщение `(в секундах,пока)` по умолчанию равен нулю
     - :mod:`chat_id`: для `отправки` сообщения по `указанному` chat_id 
     - :mod:`message_text`: `текст` сообщения для `отправки`
+    - :mod:`exact_date`: `точная` дата и время в формате `год-месяц-день` часы:минуты:секунды, например, `'2022-02-06 12:30:00'`
     '''
 
     # Используем операторы try, except, для безопасного использования
-    try:
-        
-        # Выводим данные в терминал (не обязательно)
+    # try:
+    if exact_date:
+        now = datetime.datetime.now()
+        send_time = datetime.datetime.strptime(f"{exact_date}.{now.year}", "%d.%m.%M.%Y")
+        delay_second = int(time.mktime(send_time.timetuple()) - time.mktime(now.timetuple()))
+        print(f"Это делэй сэкнод{delay_second}")
+        if delay_second < 0:
+            print(f'{colorama.Fore.RED} Неверный ввод точного времени, chat_id : {chat_id} {colorama.Style.RESET_ALL}')
+
         print(f'{colorama.Fore.GREEN} Отложенное сообщение создано, вы в ожидании ! {colorama.Style.RESET_ALL}')
-        # Переводим секунды в минуты, для использования в asyncio.sleep()
-        delay_second = (int(schedule_delay) * 60)
-        # Выводим время в терминал (не обязательно)
-        print(f'Это делей секонд : {delay_second}')
         # Ожидаем указанное время, используя asyncio.sleep()
         await asyncio.sleep(delay_second)
         # Отправляем сообщение по указанному chat_id, используя bot.send_message()
         await bot.send_message(chat_id = chat_id, text = message_text)
     
     # Обрабатываем ошибку, если она возникнет при запросе
-    except Exception as error:
-        print(f'Ошибка в функции для отложенных сообщений, название ошибки : {colorama.Fore.RED} {error} {colorama.Style.RESET_ALL}')
-        return
+    # except Exception as error:
+    #     print(f'Ошибка в функции для отложенных сообщений, название ошибки : {colorama.Fore.RED} {error} {colorama.Style.RESET_ALL}')
+    #     return
