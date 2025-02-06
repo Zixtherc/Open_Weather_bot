@@ -1,7 +1,7 @@
 from bot_modules.create_bot import dp, bot
 import asyncio
 import logging
-from bot_modules.callback_query import router
+from bot_modules.handlers import router
 from bot_modules.api_requests.google_calendar import authorization
 from bot_modules.api_requests.create_event_calendar import write_event
 

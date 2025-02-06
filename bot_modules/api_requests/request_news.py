@@ -18,7 +18,7 @@ api_dict = read_json(name_json = "config_api.json")
 API_KEY = api_dict["api_key_news"]
 
 
-def request_news(country: str, count : int = 0):
+def request_news(country: str, count : int = 0, language : str = "ru"):
     r'''
     Создаём функцию с параметрами :
     - :mod:`country`: `параметр` для отправки запроса по `указанной` стране пользователя
@@ -43,13 +43,13 @@ def request_news(country: str, count : int = 0):
                 news_id = news_data["articles"][count]
 
                 # Создаём переменную в которой хранится автор статьи
-                news_author = my_translate(text = news_id["author"])
+                news_author = my_translate(text = news_id["author"], lang = language)
                 # Создаём переменную в которой хранится заголовок статьи
-                news_title = my_translate(text = news_id["title"])
+                news_title = my_translate(text = news_id["title"], lang = language)
                 # Создаём переменную в которой хранится описание статьи
-                news_description = my_translate(text = news_id["description"])
+                news_description = my_translate(text = news_id["description"], lang = language)
                 # Создаём переменную в которой хранится ссылка на источник статьи
-                news_source = my_translate(text = news_id["url"])
+                news_source = news_id["url"]
                 # Создаём переменную в которой хранится дата публикации статьи
                 news_time = my_translate(text = news_id["publishedAt"])
                 # Преобразуем дату из формата ISO 8601 в формат dd.mm.yyyy
@@ -82,11 +82,11 @@ def request_news(country: str, count : int = 0):
                 # Создаём переменную для упрощения кода, к параметру count, добавляем по +1, так-как в новость идёт с нуля
                 news_id = news_data["articles"][count]
                 # Создаём переменную в которой хранится автор статьи
-                news_author = news_id["author"]
+                news_author = my_translate(text = news_id["author"], lang = language)
                 # Создаём переменную в которой хранится заголовок статьи
-                news_title = news_id["title"]
+                news_title = my_translate(text = news_id["title"], lang = language)
                 # Создаём переменную в которой хранится описание статьи
-                news_description = news_id["description"]
+                news_description = my_translate(text = news_id["description"], lang = language)
                 # Создаём переменную в которой хранится ссылка на источник статьи
                 news_source = news_id["url"]
                 # Создаём переменную в которой хранится дата публикации статьи
