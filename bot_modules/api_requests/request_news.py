@@ -43,15 +43,15 @@ def request_news(country: str, count : int = 0):
                 news_id = news_data["articles"][count]
 
                 # Создаём переменную в которой хранится автор статьи
-                news_author = news_id["author"]
+                news_author = my_translate(text = news_id["author"])
                 # Создаём переменную в которой хранится заголовок статьи
-                news_title = news_id["title"]
+                news_title = my_translate(text = news_id["title"])
                 # Создаём переменную в которой хранится описание статьи
-                news_description = news_id["description"]
+                news_description = my_translate(text = news_id["description"])
                 # Создаём переменную в которой хранится ссылка на источник статьи
-                news_source = news_id["url"]
+                news_source = my_translate(text = news_id["url"])
                 # Создаём переменную в которой хранится дата публикации статьи
-                news_time = news_id["publishedAt"]
+                news_time = my_translate(text = news_id["publishedAt"])
                 # Преобразуем дату из формата ISO 8601 в формат dd.mm.yyyy
                 ready_time = news_time.split("T")[0]
                 len_count_news = len(news_data["articles"])

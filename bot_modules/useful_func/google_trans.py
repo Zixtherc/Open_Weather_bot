@@ -2,9 +2,9 @@ r'''
 :mod:`Модуль` который вмещает в себя `функцию` перевода текста
 '''
 # Необходимый импорт Класса 
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 
-async def my_translate(text: str, lang: str = 'ru'):
+def my_translate(text: str, lang: str = 'ru'):
     '''
     :mod:`Функция`, которая вмещает в себя параметры:
     - :mod:`text`: для текста который мы будем переводить
@@ -17,11 +17,5 @@ async def my_translate(text: str, lang: str = 'ru'):
     ```
     TERMINAL > Привет, мир!
     '''
-    # Создаём объект класса от Translator
-    translator = Translator()
-    # Выполняем перевод текста с одного языка на другой
-    translation = await translator.translate(text, dest=lang)
-    # Выводим переведенный текст
-    print(translation.text)
-    # Возвращаем переведенный текст для дальнейшего использования
+    translation = GoogleTranslator(source = "auto", target = lang).translate(text = text)
     return translation
