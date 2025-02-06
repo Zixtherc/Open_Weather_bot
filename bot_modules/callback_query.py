@@ -259,13 +259,12 @@ async def send_news(message: Message, state: FSMContext):
     # Записываем данные в переменную страны
     country = ready_data[0]
     # Какая новость по счету интересна пользователю
-    count = 0
     # Используем операторы try, except, для безопасного использования
     try:
         # Если в переменной есть какие-то данные
         if country:
             # Вызываем фукнцию, и записываем данные в переменную
-            news_info = request_news(country = country, count = count)
+            news_info = request_news(country = country)
             # Если данные есть, и функция отработала
             if news_info:
                 # Делим в каждую переменную данные который нам надо
@@ -279,7 +278,7 @@ async def send_news(message: Message, state: FSMContext):
                     f"Опис: {news_description}\n"
                     f"Джерело: {news_source}")
                 
-                await state.update_data(country = country, count_news = count_news)
+                await state.update_data(country = country,count_news = count_news)
 
                 # Отправляем данные
                 await message.answer(news_message, reply_markup = news_keyboard)
@@ -296,15 +295,15 @@ async def send_news(message: Message, state: FSMContext):
 @router.callback_query(F.data == "next_news")
 async def n_news(callback : CallbackQuery, state : FSMContext):
     data = await state.get_data()
-    count_news = data.get('count_news', 0) + 1
+    count_news = data.get('count_news', 0)
     print(count_news)
-    count = 0
+    count = data.get("count", 0) + 1
+    print(count)
     if count >= count_news:
         await callback.answer('Вы достигли максимального значения новостей', show_alert = True)
         return
     country = data.get("country")
     news_info = request_news(country = country, count = count)
-    count += 1 
     if news_info:
         news_author, news_title, news_description, news_source, news_time, count_news = news_info
         # Группируем переменную для удобной отправки  
@@ -314,7 +313,33 @@ async def n_news(callback : CallbackQuery, state : FSMContext):
             f"Дата публікації: {news_time}\n"
             f"Опис: {news_description}\n"
             f"Джерело: {news_source}")
-        await state.update_data(count = count + 1)
+        await state.update_data(count = count)
+        await callback.message.edit_text(news_message,reply_markup = news_keyboard)
+    else:
+        await callback.message.edit_text("Не удалось получить данные о новостях")
+
+@router.callback_query(F.data == "back_news")
+async def n_news(callback : CallbackQuery, state : FSMContext):
+    data = await state.get_data()
+    count_news = data.get('count_news', 0)
+    print(count_news)
+    count = data.get("count", 0) - 1
+    print(count)
+    if count < 0:
+        await callback.answer('Вы достигли минимального значения новостей', show_alert = True)
+        return
+    country = data.get("country")
+    news_info = request_news(country = country, count = count)
+    if news_info:
+        news_author, news_title, news_description, news_source, news_time, count_news = news_info
+        # Группируем переменную для удобной отправки  
+        news_message = (
+            f"Заголовок: {news_title}\n"
+            f"Автор: {news_author}\n"
+            f"Дата публікації: {news_time}\n"
+            f"Опис: {news_description}\n"
+            f"Джерело: {news_source}")
+        await state.update_data(count = count)
         await callback.message.edit_text(news_message,reply_markup = news_keyboard)
     else:
         await callback.message.edit_text("Не удалось получить данные о новостях")
