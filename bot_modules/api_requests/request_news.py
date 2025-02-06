@@ -39,7 +39,7 @@ def request_news(country: str, count : int = 0, language : str = "ru"):
                 news_data = json.loads(response.content)
                 # Загружаем данные в JSON файл (предполагается, что у вас есть функция load_json)
                 load_json(name_json="load_news.json", value_file=news_data)
-                # Создаём переменную для упрощения кода, к параметру count, добавляем по +1, так-как в новость идёт с нуля
+                # Создаём переменную для упрощения кода, к параметру count
                 news_id = news_data["articles"][count]
 
                 # Создаём переменную в которой хранится автор статьи

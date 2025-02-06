@@ -25,14 +25,14 @@ class Form(StatesGroup):
 @router.callback_query(F.data == "diary")
 async def wait_data_diary(callback : CallbackQuery, state : FSMContext):
     callback.message.answer(' ')
-    await callback.message.answer("Введите время запланированого сообщения и его текст МИНУТЫ,или ТОЧНУЮ ДАТУ отложенного сообщения,вместе с МИНУТАМИ")
+    await callback.message.answer("Введите время запланированого сообщения и его текст. Пример : 06.02 23.11 Hello World (где 23 это час,11 минуты)")
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_diary)
 
 # Создаём обработчик на команду diary
 @router.message(Command('diary'))
 async def wait_data_diary(message : Message, state : FSMContext):
-    await message.answer("Введите время запланированого сообщения и его текст МИНУТЫ,или ТОЧНУЮ ДАТУ отложенного сообщения,вместе с МИНУТАМИ")
+    await message.answer("Введите время запланированого сообщения и его текст. Пример : 06.02 23.11 Hello World (где 23 это час,11 минуты)")
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_diary)
 
@@ -54,7 +54,7 @@ async def schedule_send(message : Message, state : FSMContext):
     # Получаем текст полученных данных
     text = ready_data[-1]
 
-    # Используем операторы try, excep, для безопасного использования
+    # Используем операторы try, except, для безопасного использования
     try:
         # Вызываем функцию отложенных сообщений, в параметр записываем выше указанные переменные
         await schedule(exact_date = time, chat_id = chat_id, message_text = text)

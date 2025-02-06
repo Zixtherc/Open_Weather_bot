@@ -18,7 +18,7 @@ async def schedule(chat_id : int = None, message_text : str = None, exact_date: 
     Вмещает в себя параметры: 
     - :mod:`chat_id`: для `отправки` сообщения по `указанному` chat_id 
     - :mod:`message_text`: `текст` сообщения для `отправки`
-    - :mod:`exact_date`: `точная` дата и время в формате `год-месяц-день` часы:минуты:секунды, например, `'2022-02-06 12:30:00'`
+    - :mod:`exact_date`: `точная` дата и время в формате `год-месяц-день` часы:минуты:секунды, например, `'2025-02-06 12:30:00'`
 
     Пример использования : 
     ```python
@@ -31,10 +31,6 @@ async def schedule(chat_id : int = None, message_text : str = None, exact_date: 
             now = datetime.datetime.now()
             send_time = datetime.datetime.strptime(f"{exact_date}.{now.year}", "%d.%m.%H.%M.%Y")
             delay_second = int(time.mktime(send_time.timetuple()) - time.mktime(now.timetuple()))
-            print(f"======={(send_time.timetuple())}")
-            print()
-            print(f'-------{time.mktime(now.timetuple())}')
-            print(f'>>>>>>{delay_second}')
             if delay_second < 0:
                 print(f'{colorama.Fore.RED} Неверный ввод точного времени, chat_id : {chat_id} {colorama.Style.RESET_ALL}')
 
