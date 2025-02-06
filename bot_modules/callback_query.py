@@ -3,14 +3,16 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
 
+# Импорт для красивого вывода в терминал (необязательно)
 import colorama
+
 # Импорты функций
 from .api_requests.requests_open_weather import request_city_user
 from .useful_func.scheduled_messages import schedule
 from .api_requests.request_news import request_news
 
 # Импорты клавиатур 
-from .keyboard.keyboard import inline_keyboard, forecast_keyboard
+from .keyboard.keyboard import inline_keyboard, forecast_keyboard, news_keyboard
 
 # Импорт состояний для управления вводом пользователя
 from aiogram.fsm.state import StatesGroup, State
@@ -82,10 +84,10 @@ async def city_wait(message: Message, state: FSMContext):
                             f"Влажность: {humidity}%\n"
                             f"Видимость: {visibility} м\n"
                             f"Скорость ветра: {wind} м/c\n\n")
-                # Обновляем состояние city_user и coutn 
+                # Обновляем состояние city_user и count
                 await state.update_data(city_user=city_user, count=0)
             except Exception as error:
-                await message.reply("К сожалению, вы не правильно ввели данные,попробуйте проверить и ввести всё верно")
+                await message.reply(f"К сожалению, вы не правильно ввели данные,попробуйте проверить и ввести всё верно. Код ошибки: {error}")
         
         # Если данные не найдены, то  Выводим ошибку
         else:
@@ -115,7 +117,6 @@ async def n_forecast(callback: CallbackQuery, state: FSMContext):
     # Проверяем, чтобы count не стал меньше 0
     if count >= 4:
         await callback.answer("Вы достигли минимального значения прогноза.", show_alert=True)
-        
         return  # Прерываем выполнение функции
 
     # Записываем в переменную состояние city_user
@@ -141,6 +142,7 @@ async def n_forecast(callback: CallbackQuery, state: FSMContext):
         await state.update_data(count=count)
         # Редактируем текст с клавиатурой
         await callback.message.edit_text(forecast, reply_markup=forecast_keyboard)
+
     # Если данных нет, то выводим ошибку
     else:
         await callback.message.edit_text("Не удалось получить данные о погоде.")
@@ -234,14 +236,14 @@ async def schedule_send(message : Message, state : FSMContext):
 @router.callback_query(F.data == "news")
 async def wait_data_news(callback: CallbackQuery, state: FSMContext):
     callback.message.answer(' ')
-    await callback.message.answer("Введите страну по которой хотите получить новость и какую по счёт новость вы хотите получить")
+    await callback.message.answer("Введите страну по которой хотите получить новость")
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_news)
     
 # Создаём обработчик на команду news
 @router.message(Command("news"))
 async def wait_data_news(message: CallbackQuery, state: FSMContext):
-    await message.answer("Введите страну по которой хотите получить новость и какую по счёт новость вы хотите получить")
+    await message.answer("Введите страну по которой хотите получить новость")
     # Устанавливаем состояние
     await state.set_state(Form.wait_data_news)
 
@@ -257,17 +259,17 @@ async def send_news(message: Message, state: FSMContext):
     # Записываем данные в переменную страны
     country = ready_data[0]
     # Какая новость по счету интересна пользователю
-    news_id = int(ready_data[-1])
-    # Используем операторы try, excep, для безопасного использования
+    count = 0
+    # Используем операторы try, except, для безопасного использования
     try:
         # Если в переменной есть какие-то данные
         if country:
             # Вызываем фукнцию, и записываем данные в переменную
-            news_info = request_news(country = country, count = news_id)
+            news_info = request_news(country = country, count = count)
             # Если данные есть, и функция отработала
             if news_info:
                 # Делим в каждую переменную данные который нам надо
-                news_author, news_title, news_description, news_source, news_time = news_info
+                news_author, news_title, news_description, news_source, news_time, count_news = news_info
 
                 # Группируем переменную для удобной отправки  
                 news_message = (
@@ -276,8 +278,11 @@ async def send_news(message: Message, state: FSMContext):
                     f"Дата публікації: {news_time}\n"
                     f"Опис: {news_description}\n"
                     f"Джерело: {news_source}")
+                
+                await state.update_data(country = country, count_news = count_news)
+
                 # Отправляем данные
-                await message.answer(news_message)
+                await message.answer(news_message, reply_markup = news_keyboard)
         # Если данных по указанной стране нету
         else:
             # Отправляем сообщение пользователю
@@ -287,3 +292,29 @@ async def send_news(message: Message, state: FSMContext):
     except Exception as error:
         # Выводим ошибку пользователю 
         await message.answer(f'Ошибка при запроса новостей, код ошибки : {error}')
+
+@router.callback_query(F.data == "next_news")
+async def n_news(callback : CallbackQuery, state : FSMContext):
+    data = await state.get_data()
+    count_news = data.get('count_news', 0) + 1
+    print(count_news)
+    count = 0
+    if count >= count_news:
+        await callback.answer('Вы достигли максимального значения новостей', show_alert = True)
+        return
+    country = data.get("country")
+    news_info = request_news(country = country, count = count)
+    count += 1 
+    if news_info:
+        news_author, news_title, news_description, news_source, news_time, count_news = news_info
+        # Группируем переменную для удобной отправки  
+        news_message = (
+            f"Заголовок: {news_title}\n"
+            f"Автор: {news_author}\n"
+            f"Дата публікації: {news_time}\n"
+            f"Опис: {news_description}\n"
+            f"Джерело: {news_source}")
+        await state.update_data(count = count + 1)
+        await callback.message.edit_text(news_message,reply_markup = news_keyboard)
+    else:
+        await callback.message.edit_text("Не удалось получить данные о новостях")

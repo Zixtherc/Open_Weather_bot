@@ -22,7 +22,7 @@ async def schedule(chat_id : int = None, message_text : str = None, exact_date: 
 
     Пример использования : 
     ```python
-    await schedule(chat_id = 123456789, message_text = "Привет мир!", exact_date = "05.02 23.51")
+    await schedule(chat_id = 123456789, message_text = "Привет мир!", exact_date = "05.02 13.13")
     '''
 
     # Используем операторы try, except, для безопасного использования
