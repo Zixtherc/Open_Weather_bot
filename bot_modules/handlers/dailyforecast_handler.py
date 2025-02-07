@@ -31,4 +31,5 @@ async def daily_f(message : Message, state : FSMContext):
 @router.message(Form.wait_daily_forecast)
 async def send_daily_forecast(message : Message, state : FSMContext):
     chat_id = message.chat.id
-    await daily_forecast(date = "2025-02-07 14:14:14", chat_id = chat_id)
+    date = message.text
+    await daily_forecast(date = date , chat_id = chat_id)

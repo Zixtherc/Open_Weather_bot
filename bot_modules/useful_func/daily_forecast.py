@@ -9,6 +9,7 @@ import colorama
 from ..create_bot import bot
 
 import datetime
+import time
 
 async def daily_forecast(date: int = None, chat_id : int = None):
     '''
@@ -20,20 +21,25 @@ async def daily_forecast(date: int = None, chat_id : int = None):
     '''
 
     # Используем операторы try, except, для безопасного использования 2025.02.07 14.14.14
-    # try:
-    if date:
-        date_send = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        now = datetime.datetime.now()
-        delay = (date_send - now).total_seconds()
+    try:
+        if date:
+            now = datetime.datetime.now()
+            date_send = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M')
+            delay = (date_send - now).total_seconds()
 
-        if delay < 0:
-            print(f'{colorama.Fore.RED} Неверный ввод точного времени, chat_id : {chat_id} {colorama.Style.RESET_ALL}')
-            return
-        await bot.send_message(chat_id = chat_id, text = "Test")
-    else:
-        bot.send_message(chat_id = chat_id, text = "Неверный ввод,проверьте всё заново, и отправьте сначало")
+            if delay < 0:
+                print(f'{colorama.Fore.RED} Неверный ввод точного времени, chat_id : {chat_id} {colorama.Style.RESET_ALL}')
+                date_send += datetime.timedelta(days = 1)
+                formated_date = date_send.strftime("%Y-%m-%d %H:%M")
+                print(formated_date)
+                delay = round(date_send - now).total_seconds()
+            print(f'Для отправки надо подождать: {delay} секунд')
+            await asyncio.sleep(delay)
+            await bot.send_message(chat_id = chat_id, text = "Test")
+        else:
+            bot.send_message(chat_id = chat_id, text = "Неверный ввод,проверьте всё заново, и отправьте сначало")
     
     # Обрабатываем ошибку, если она возникнет при запросе
-    # except Exception as error:
-    #     print(f'Ошибка в функции для прогноза погоды ежедневно , название ошибки : {colorama.Fore.RED} {error} {colorama.Style.RESET_ALL}')
-        # return
+    except Exception as error:
+        print(f'Ошибка в функции для прогноза погоды ежедневно , название ошибки : {colorama.Fore.RED} {error} {colorama.Style.RESET_ALL}')
+        return
