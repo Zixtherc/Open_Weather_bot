@@ -19,7 +19,7 @@ class Form(StatesGroup):
 
 @router.callback_query(F.data == "daily_forecast")
 async def daily_f(callback : CallbackQuery, state : FSMContext):
-    await callback.message.answer(" ")
+    callback.message.answer(' ')
     await callback.message.answer("Введите название города, и время в которое вы хотите получать прогноз")
     await state.set_state(Form.wait_daily_forecast)
 
@@ -30,4 +30,5 @@ async def daily_f(message : Message, state : FSMContext):
 
 @router.message(Form.wait_daily_forecast)
 async def send_daily_forecast(message : Message, state : FSMContext):
-    pass
+    chat_id = message.chat.id
+    await daily_forecast(date = "2025-02-07 14:14:14", chat_id = chat_id)

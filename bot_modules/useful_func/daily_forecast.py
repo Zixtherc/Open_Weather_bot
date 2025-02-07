@@ -9,25 +9,31 @@ import colorama
 from ..create_bot import bot
 
 import datetime
-import time
 
 async def daily_forecast(date: int = None, chat_id : int = None):
     '''
-    :mod:`Асинхронная` `функция`, которая позволит нам отправлять `ежедневный` `прогноз` погоды
+    :mod:`Асинхронная` `функция`, которая позволит нам отправлять `ежедневный` `прогноз` 
+    
+    Вмещает в себя параметры: 
+    - :mod: `date`: `точная` дата и время в формате `год-месяц-день` часы:минуты:секунды, например, `'2025-02-06 12:30:00'`
+    - :mod: `chat_id`: для `отправки` сообщения по `указанному` chat_id
     '''
 
-   # Используем операторы try, except, для безопасного использования
-    try:
-        if date:
-            now = datetime.datetime.now()
-            send_time = datetime.datetime.strptime(f"{date}.{now.year}", "%H.%M")
-            print(f'{colorama.Fore.GREEN} Выбранное время : {send_time.strftime("%H:%M")} {colorama.Style.RESET_ALL}')
-            delay_second = int(time.mktime(send_time.timetuple()) - time.mktime(now.timetuple()))
-            if delay_second < 0:
-                print(f'{colorama.Fore.RED} Неверный ввод точного времени, chat_id : {chat_id} {colorama.Style.RESET_ALL}')
+    # Используем операторы try, except, для безопасного использования 2025.02.07 14.14.14
+    # try:
+    if date:
+        date_send = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        now = datetime.datetime.now()
+        delay = (date_send - now).total_seconds()
 
+        if delay < 0:
+            print(f'{colorama.Fore.RED} Неверный ввод точного времени, chat_id : {chat_id} {colorama.Style.RESET_ALL}')
+            return
+        await bot.send_message(chat_id = chat_id, text = "Test")
+    else:
+        bot.send_message(chat_id = chat_id, text = "Неверный ввод,проверьте всё заново, и отправьте сначало")
     
     # Обрабатываем ошибку, если она возникнет при запросе
-    except Exception as error:
-        print(f'Ошибка в функции для отложенных сообщений, название ошибки : {colorama.Fore.RED} {error} {colorama.Style.RESET_ALL}')
-        return
+    # except Exception as error:
+    #     print(f'Ошибка в функции для прогноза погоды ежедневно , название ошибки : {colorama.Fore.RED} {error} {colorama.Style.RESET_ALL}')
+        # return
