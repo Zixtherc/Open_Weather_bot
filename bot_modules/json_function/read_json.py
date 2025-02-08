@@ -4,7 +4,7 @@ import json
 def read_json (name_json : str):
     try:
 
-        path = abspath(join(__file__, '..', '..', 'static', name_json))
+        path = abspath(join(__file__, '..', '..', '..', 'static', name_json))
         print(path)
 
         with open(path, "r") as file: 

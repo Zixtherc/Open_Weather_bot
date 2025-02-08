@@ -32,14 +32,14 @@ def authorization():
 
         else:
             # Строим путь к файлу с настройками клиента
-            path_to_credentials = abspath(join(__file__, '..',  '..', 'static', 'credentials.json'))
+            path_to_credentials = abspath(join(__file__, '..',  '..', '..', 'static', 'credentials.json'))
             flow = InstalledAppFlow.from_client_secrets_file(
                 path_to_credentials, SCOPES)
             
             creds = flow.run_local_server(port=0)
         
         # Создаем путь где мы будем создавать токен
-        path_to_token = abspath(join(__file__, '..', '..', 'static', 'token.json'))
+        path_to_token = abspath(join(__file__, '..', '..', '..', 'static', 'token.json'))
         # Создаём / обновляем токен ( сейчас он только создаётся )
         with open(path_to_token , "w") as token:
             token.write(creds.to_json())
