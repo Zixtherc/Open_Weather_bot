@@ -7,7 +7,7 @@ from aiogram.filters import  Command
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-# Импорт объект класса от DataBase
+# Импорт объект класса от Database
 from ..db_function.class_database import db 
 
 # Импортируем объект от класса Router
@@ -34,4 +34,5 @@ async def send_daily_forecast(message : Message, state : FSMContext):
     data = await state.get_data()
     user_data = await data.get("wait_for_task")
     ready_data = user_data.split(' ', 1)
-    
+    text = ready_data[0]
+    # await db.
