@@ -2,8 +2,8 @@
 import requests
 import json
 # Импортируем функцию, которая позволит нам читать json файлы
-from ..jsn_function.read_json import read_json
-from ..jsn_function.load_json import load_json
+from ..json_function.read_json import read_json
+from ..json_function.load_json import load_json
 
 # Читаем json файл, и записываем в переменную (чтобы каждый раз не вызывать функцию)
 api_dict = read_json(name_json="config_api.json")

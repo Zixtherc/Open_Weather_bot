@@ -47,7 +47,8 @@ class Database():
             insert_request = '''UPDATE users SET task = ?, send_time = ? WHERE chat_id = ?'''
             self.cursor.execute(insert_request, (task, send_time, chat_id))
             self.connection.commit()
+            return True
         else:
-            return 
-db = Database(path_to_db = "bot_modules/db_function/database.db")
+            return False
         
+db = Database(path_to_db = "bot_modules/db_function/database.db")
