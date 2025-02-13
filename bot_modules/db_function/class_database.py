@@ -43,7 +43,7 @@ class Database:
         '''
         async with async_sql.connect(self.db_path) as db:
             await db.execute(
-                '''INSERT INTO users (chat_id, task, send_time) VALUES (?, ?, ?)'''), (chat_id, task, send_time)
+                '''INSERT INTO users (chat_id, task, send_time) VALUES (?, ?, ?)''', (chat_id, task, send_time))
             await db.commit()
 
     async def get_task(self, chat_id: int):

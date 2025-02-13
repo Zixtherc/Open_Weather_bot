@@ -6,8 +6,8 @@ import requests
 # Модуль json,нужен для преобразования данных 
 import json
 # Необходимые модули что бы прочитать и записать данные из json файла / в json файл
-from ..jsn_function.read_json import read_json
-from ..jsn_function.load_json import load_json
+from ..json_function.read_json import read_json
+from ..json_function.load_json import load_json
 
 # Импортируем функцию, для перевода текста (пока в разработке)
 from ..useful_func.google_trans import my_translate

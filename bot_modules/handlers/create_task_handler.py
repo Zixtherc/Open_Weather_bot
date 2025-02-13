@@ -18,21 +18,25 @@ class Form(StatesGroup):
     wait_for_task = State()
 
 @router.callback_query(F.data == "new_task")
-async def daily_f(callback : CallbackQuery, state : FSMContext):
+async def create_task(callback : CallbackQuery, state : FSMContext):
     callback.message.answer(' ')
-    await callback.message.answer("Введите название города, и время в которое вы хотите получать прогноз")
+    await callback.message.answer("Введите время заметки, следом введите её текст. Пример : 13.02 13:13 Hello")
     await state.set_state(Form.wait_for_task)
 
 @router.message(Command("new_task"))
-async def daily_f(message : Message, state : FSMContext):
-    await message.answer("Введите название заметки которую вы хотите добавить, так же введите время в которое оно к вам придёт")
+async def create_task(message : Message, state : FSMContext):
+    await message.answer("Введите время заметки, следом введите её текст. Пример : 13.02 13:13 Hello")
     await state.set_state(Form.wait_for_task)
 
 @router.message(Form.wait_for_task)
-async def send_daily_forecast(message : Message, state : FSMContext):
+async def new_task(message : Message, state : FSMContext):
     chat_id = message.chat.id
     data = await state.get_data()
-    user_data = await data.get("wait_for_task")
-    ready_data = user_data.split(' ', 1)
-    text = ready_data[0]
-    # await db.
+    user_data = data.get("wait_for_task", message.text)
+    ready_data = user_data.split(' ', 2)
+    print(f'Это рэди дата которая мне понадобится: {ready_data}')
+    task = ready_data[-1]
+    date = ready_data[0]
+    time = ready_data[1]
+    send_time = (date, time)
+    await db.add_user(chat_id = chat_id, task = task, send_time = send_time)

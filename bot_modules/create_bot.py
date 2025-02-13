@@ -1,5 +1,5 @@
 from aiogram import Bot, Dispatcher, Router
-from .jsn_function.read_json import read_json
+from .json_function.read_json import read_json
 
 # Создаём объект класса роутер
 router = Router()
