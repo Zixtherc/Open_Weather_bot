@@ -13,6 +13,8 @@ from ..db_function.class_database import db
 # Импортируем объект от класса Router
 from ..create_bot import router
 
+# Импортируем модуль для преобразования времени в нужный нам формат
+from datetime import datetime
 # Создаём класс для управления вводом пользователя 
 class Form(StatesGroup):
     wait_for_task = State()
@@ -36,7 +38,6 @@ async def new_task(message : Message, state : FSMContext):
     ready_data = user_data.split(' ', 2)
     print(f'Это рэди дата которая мне понадобится: {ready_data}')
     task = ready_data[-1]
-    date = ready_data[0]
-    time = ready_data[1]
-    send_time = (date, time)
+    send_time = f"{ready_data[0]} {ready_data[1]}"
+    print(f'Это дейт тайм: {send_time}')
     await db.add_user(chat_id = chat_id, task = task, send_time = send_time)

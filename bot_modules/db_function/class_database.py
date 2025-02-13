@@ -1,5 +1,5 @@
 import aiosqlite as async_sql
-
+import asyncio 
 class Database:
     '''### Класс базы данных ###'''
     def __init__(self, path_to_db: str):
@@ -25,9 +25,9 @@ class Database:
                 id INTEGER PRIMARY KEY,
                 chat_id INTEGER NOT NULL UNIQUE,
                 task TEXT NOT NULL,
-                send_time INTEGER NOT NULL)''')
+                send_time STRING NOT NULL)''')
             await db.commit()
-    async def add_user(self, chat_id: int, task: str, send_time: int):
+    async def add_user(self, chat_id: int, task: str, send_time: str):
         '''
         `Метод`, который добавляет `нового` пользователя в базу данных
         
@@ -61,7 +61,7 @@ class Database:
             async with db.execute('''SELECT * FROM users WHERE chat_id = ?''', (chat_id,)) as cursor:
                 # Возвращаем только одного ( и так вернётся лишь один, т.к у нас chat_id уникальный параметр)
                 return await cursor.fetchone()
-    async def add_note(self, chat_id: int, task: str, send_time: int):
+    async def update_note(self, chat_id: int, task: str, send_time: str):
         '''
         `Метод`, который добавляет заметку в базу данных
         
@@ -74,10 +74,10 @@ class Database:
         '''
         async with async_sql.connect(self.db_path) as db:
             async with db.execute('''SELECT * FROM users WHERE chat_id = ?''', (chat_id,)) as cursor:
-                user = cursor.fetchone()
+                user = await cursor.fetchone()
                 # Проверка что такой пользователь существует
                 if user:
-                    await db.execute('''UPDATE users SET task = ?, send_time = ? WHERE chat_id = ?''')
+                    await db.execute('''UPDATE users SET task = ?, send_time = ? WHERE chat_id = ?''', (task, send_time, chat_id))
                     await db.commit()
                     # Возвращаем True, если пользователь был найден, и данные обновленны
                     return True
@@ -86,3 +86,8 @@ class Database:
             
 # Объект от класса Database
 db = Database(path_to_db = "bot_modules/db_function/database.db")
+
+async def main():
+    await db.create_table()
+
+asyncio.run(main())
