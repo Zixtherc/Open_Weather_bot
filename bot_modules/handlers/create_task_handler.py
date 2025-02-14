@@ -13,8 +13,6 @@ from ..db_function.class_database import db
 # Импортируем объект от класса Router
 from ..create_bot import router
 
-# Импортируем модуль для преобразования времени в нужный нам формат
-from datetime import datetime
 # Создаём класс для управления вводом пользователя 
 class Form(StatesGroup):
     wait_for_task = State()

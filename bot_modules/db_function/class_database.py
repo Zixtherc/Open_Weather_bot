@@ -65,7 +65,9 @@ class Database:
         async with async_sql.connect(self.db_path) as db:
             async with db.execute('''SELECT * FROM users WHERE chat_id = ?''', (chat_id,)) as cursor:
                 # Возвращаем только одного ( и так вернётся лишь один, т.к у нас chat_id уникальный параметр)
-                return await cursor.fetchone()
+                user_task = await cursor.fetchone()
+                primary_key, chat_id, task, send_time = user_task
+                return task, send_time
             
     async def update_note(self, chat_id: int, task: str, send_time: str):
         '''
