@@ -50,7 +50,7 @@ async def schedule_send(message : Message, state : FSMContext):
     ready_data = user_data.split(' ', 2)
     # Получаем время полученных данных
     time = f'{ready_data[0]}.{ready_data[1]}'
-    print(f'Это время поаааааа{time}')
+    print(f'Это время которое я записываю в параметр : {time}')
     # Получаем текст полученных данных
     text = ready_data[-1]
 

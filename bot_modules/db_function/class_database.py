@@ -1,5 +1,6 @@
 import aiosqlite as async_sql
 import asyncio 
+from ..useful_func.scheduled_messages import schedule
 class Database:
     '''### Класс базы данных ###'''
     def __init__(self, path_to_db: str):
@@ -8,6 +9,7 @@ class Database:
         -:mod:`path_to_db`: Путь где будет создана база данных
         '''
         self.db_path = path_to_db
+        
     async def create_table(self):
         '''
         `Метод`, который создает таблицу в базе данных
@@ -27,6 +29,7 @@ class Database:
                 task TEXT NOT NULL,
                 send_time STRING NOT NULL)''')
             await db.commit()
+
     async def add_user(self, chat_id: int, task: str, send_time: str):
         '''
         `Метод`, который добавляет `нового` пользователя в базу данных
@@ -43,8 +46,10 @@ class Database:
         '''
         async with async_sql.connect(self.db_path) as db:
             await db.execute(
-                '''INSERT INTO users (chat_id, task, send_time) VALUES (?, ?, ?)''', (chat_id, task, send_time))
+                '''INSERT OR REPLACE INTO users (chat_id, task, send_time) VALUES (?, ?, ?)''', (chat_id, task, send_time))
             await db.commit()
+            print(send_time)
+            await schedule(chat_id = chat_id, message_text = task, exact_date = send_time)
 
     async def get_task(self, chat_id: int):
         '''
@@ -61,6 +66,7 @@ class Database:
             async with db.execute('''SELECT * FROM users WHERE chat_id = ?''', (chat_id,)) as cursor:
                 # Возвращаем только одного ( и так вернётся лишь один, т.к у нас chat_id уникальный параметр)
                 return await cursor.fetchone()
+            
     async def update_note(self, chat_id: int, task: str, send_time: str):
         '''
         `Метод`, который добавляет заметку в базу данных
@@ -80,6 +86,7 @@ class Database:
                     await db.execute('''UPDATE users SET task = ?, send_time = ? WHERE chat_id = ?''', (task, send_time, chat_id))
                     await db.commit()
                     # Возвращаем True, если пользователь был найден, и данные обновленны
+                    await schedule(chat_id = chat_id, message_text = task, exact_date = send_time)
                     return True
                 # Если пользователь не найден,возвращаем False
                 return False
