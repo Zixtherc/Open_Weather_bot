@@ -88,7 +88,7 @@ class Database:
                     await db.execute('''UPDATE users SET task = ?, send_time = ? WHERE chat_id = ?''', (task, send_time, chat_id))
                     await db.commit()
                     # Возвращаем True, если пользователь был найден, и данные обновленны
-                    await schedule(chat_id = chat_id, message_text = task, exact_date = send_time)
+                    asyncio.create_task(schedule(chat_id = chat_id, message_text = task, exact_date = send_time))
                     return True
                 # Если пользователь не найден,возвращаем False
                 return False

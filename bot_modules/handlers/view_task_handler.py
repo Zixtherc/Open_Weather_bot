@@ -13,13 +13,12 @@ from ..create_bot import router
 @router.callback_query(F.data == "view_task")
 async def create_task(callback : CallbackQuery):
     callback.message.answer(' ')
-    chat_id = callback.message.chat_id
+    chat_id = callback.message.chat.id
     task, send_time = await db.get_task(chat_id = chat_id)
     await callback.message.answer(f"Ваша заметка на день: {task}, которая будет отправленное в указанное время: {send_time} ")
 
 @router.message(Command("view_task"))
 async def create_task(message : Message):
-    
     chat_id = message.chat.id
     task, send_time = await db.get_task(chat_id = chat_id)
     await message.answer(f"Ваша заметка на день: {task}, которая будет отправленное в указанное время: {send_time} ")

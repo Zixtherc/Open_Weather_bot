@@ -5,3 +5,4 @@ from .news_handler import *
 from .dailyforecast_handler import *
 from .create_task_handler import *
 from .view_task_handler import *
+from .update_task_handler import *
